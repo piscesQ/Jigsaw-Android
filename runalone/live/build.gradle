@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion buildVersion.compileSdkVersion
+    buildToolsVersion buildVersion.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.kore.live"
+        minSdkVersion buildVersion.minSdkVersion
+        targetSdkVersion buildVersion.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation project(':interface-shelf')
+    implementation deps.kotlinStdlib
+    implementation deps.coreKtx
+    implementation deps.appcompat
+    implementation deps.material
+    implementation deps.constraintlayout
+    testImplementation deps.junit
+    androidTestImplementation deps.extJunit
+    androidTestImplementation deps.espressoCore
+}

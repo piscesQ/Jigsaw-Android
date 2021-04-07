@@ -1,0 +1,47 @@
+# IntelliJ IDEA project files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Android debug tools folder
+/captures
+
+# Android auto gen files
+bin/
+gen/
+default.properties
+
+# gradle/Android Studio build folders
+.gradle/
+build/
+# gradle/
+out/
+target/
+local.properties
+gradlew
+gradlew.bat
+
+# OS gen folder information
+Thumbs.db
+.DS_Store
+
+# temp files
+*.bak
+*.tmp
+*.temp
+*.swp
+*.vpp~*
+*.*~
+tmp/
+
+# eclipse config files
+.project
+.settings/
+
+# cmake
+.externalNativeBuild/
+
+# test dir
+# androidTest/
+# test/

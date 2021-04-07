@@ -1,0 +1,9 @@
+include ':jiasaw-apt'
+include ':app'
+include ':runalone:news', ':runalone:live', ':runalone:discover', ':runalone:me'
+include ':component-news', ':component-live', ':component-discover', ':component-me'
+include ':interface-shelf'
+include ':commons'
+include ':jigsaw-core', ':jigsaw-anno', ':plugin'
+
+rootProject.name = "jigsaw"

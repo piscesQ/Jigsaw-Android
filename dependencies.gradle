@@ -1,0 +1,33 @@
+ext {
+    buildVersion = [
+            compileSdkVersion: 28,
+            buildToolsVersion: "28.0.3",
+            minSdkVersion    : 16,
+            targetSdkVersion : 28
+    ]
+
+    versions = [
+            androidPlugin   : '4.1.2',
+            kotlin          : '1.4.10',
+            coreKtx         : '1.3.2',
+            appcompat       : '1.2.0',
+            material        : '1.3.0',
+            constraintlayout: '2.0.4',
+            junit           : '4.13.2',
+            extJunit        : '1.1.2',
+            espressoCore    : '3.3.0',
+            legacySupportV4 : '1.0.0'
+    ]
+
+    deps = [
+            kotlinStdlib    : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}",
+            coreKtx         : "androidx.core:core-ktx:${versions.coreKtx}",
+            appcompat       : "androidx.appcompat:appcompat:${versions.appcompat}",
+            material        : "com.google.android.material:material:${versions.material}",
+            constraintlayout: "androidx.constraintlayout:constraintlayout:${versions.constraintlayout}",
+            junit           : "junit:junit:${versions.junit}",
+            extJunit        : "androidx.test.ext:junit:${versions.extJunit}",
+            espressoCore    : "androidx.test.espresso:espresso-core:${versions.espressoCore}",
+            legacySupportV4 : "androidx.legacy:legacy-support-v4:${versions.legacySupportV4}"
+    ]
+}
