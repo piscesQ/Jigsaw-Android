@@ -24,8 +24,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -34,7 +34,7 @@ android {
 }
 
 dependencies {
-    implementation project(':jigsaw-core')
+    api project(':jigsaw-core')
     implementation deps.kotlinStdlib
     implementation deps.coreKtx
     implementation deps.appcompat

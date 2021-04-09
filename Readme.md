@@ -18,7 +18,7 @@
 （1）@ModuleApp
 （2）@MainApp  
         
-### apt
+### router-apt
 1、使用注解处理器，将处理路由信息，生成辅助类
 
 ### 独立运行
