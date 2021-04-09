@@ -3,6 +3,7 @@
     package="com.kore.sample.live">
 
     <application>
+        <activity android:name=".LiveDetailActivity" />
         <activity android:name=".LiveActivity" />
     </application>
 
