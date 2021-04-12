@@ -1,7 +1,10 @@
 package com.kore.sample.news
 
 import android.util.Log
+import com.kore.jigsaw.anno.ModuleApp
+import com.kore.jigsaw.core.Jigsaw
 import com.kore.sample.commons.base.BaseApp
+import com.kore.sample.interfaceshelf.news.INews
 
 /**
  * @author koreq
@@ -12,10 +15,12 @@ import com.kore.sample.commons.base.BaseApp
 
 private const val TAG = "BaseApp-News"
 
+@ModuleApp(priority = 10)
 class NewsApp : BaseApp() {
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "NewsApp onCreate")
+        Jigsaw.addRelation(INews::class.java, NewsImpl::class.java)
     }
 }

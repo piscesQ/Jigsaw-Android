@@ -1,5 +1,6 @@
 package com.kore.jigsaw.plugin
 
+import com.android.build.gradle.internal.dependency.VariantDependencies
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -96,9 +97,9 @@ class JigsawPlugin implements Plugin<Project> {
 
             def artifact = isMavenArtifact(str)
             if (artifact) {     // maven 格式的依赖
-                project.dependencies.add("compile", str)
+                project.dependencies.add(VariantDependencies.CONFIG_NAME_API, str)
             } else {            // 本地 libray 依赖
-                project.dependencies.add("compile", project.project(':' + str))
+                project.dependencies.add(VariantDependencies.CONFIG_NAME_API, project.project(':' + str))
             }
         }
     }

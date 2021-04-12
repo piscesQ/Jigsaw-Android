@@ -1,7 +1,10 @@
 package com.kore.sample.discover
 
 import android.util.Log
+import com.kore.jigsaw.anno.ModuleApp
+import com.kore.jigsaw.core.Jigsaw
 import com.kore.sample.commons.base.BaseApp
+import com.kore.sample.interfaceshelf.discover.IDiscover
 
 /**
  * @author koreq
@@ -12,10 +15,12 @@ import com.kore.sample.commons.base.BaseApp
 
 private const val TAG = "BaseApp-Discover"
 
+@ModuleApp(priority = 30)
 class DiscoverApp : BaseApp() {
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "DiscoverApp onCreate")
+        Jigsaw.addRelation(IDiscover::class.java, DiscoverImpl::class.java)
     }
 }

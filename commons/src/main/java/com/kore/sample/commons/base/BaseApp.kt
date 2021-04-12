@@ -7,7 +7,8 @@ open class BaseApp : Application() {
     @CallSuper
     override fun onCreate() {
         super.onCreate()
-        INSTANCE = applicationContext as Application
+//        INSTANCE = applicationContext as Application
+        INSTANCE = this
     }
 
     companion object {

@@ -1,7 +1,10 @@
 package com.kore.sample.me
 
 import android.util.Log
+import com.kore.jigsaw.anno.ModuleApp
+import com.kore.jigsaw.core.Jigsaw
 import com.kore.sample.commons.base.BaseApp
+import com.kore.sample.interfaceshelf.me.IMe
 
 /**
  * @author koreq
@@ -12,10 +15,12 @@ import com.kore.sample.commons.base.BaseApp
 
 private const val TAG = "BaseApp-Me"
 
+@ModuleApp(priority = 40)
 class MeApp : BaseApp() {
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "MeApp onCreate")
+        Jigsaw.addRelation(IMe::class.java, MeImpl::class.java)
     }
 }
