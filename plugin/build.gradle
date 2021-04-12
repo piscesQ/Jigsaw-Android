@@ -1,8 +1,30 @@
 plugins {
-    id 'java-library'
+    id 'groovy'
+    id 'maven'
 }
+
+group 'com.kore.jigsaw'
+version '1.0.1'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle-api:4.0.1'
+    implementation 'com.android.tools.build:gradle:4.0.1'
+    implementation 'org.ow2.asm:asm:7.0'
+    implementation 'commons-io:commons-io:2.6'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.artifactId = 'jigsaw-plugin'
+            repository(url: uri('../repo'))
+        }
+    }
 }

@@ -16,7 +16,14 @@ ext {
             junit           : '4.13.2',
             extJunit        : '1.1.2',
             espressoCore    : '3.3.0',
-            legacySupportV4 : '1.0.0'
+            legacySupportV4 : '1.0.0',
+            jigsawPlugin    : '1.0.1'
+    ]
+
+    plu = [
+            androidPlugin   : "com.android.tools.build:gradle:${versions.androidPlugin}",
+            kotGradlePlugin : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
+            jigsawPlugin    : "com.kore.jigsaw:jigsaw-plugin:${versions.jigsawPlugin}"
     ]
 
     deps = [
