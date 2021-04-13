@@ -9,6 +9,17 @@ import org.objectweb.asm.Opcodes
  * @description 向 @MainApp 注解的类中插入代码
  */
 class MainAppVisitor extends ClassVisitor {
+
+    /*
+    下面方法在源码中是否被实现过
+     */
+    boolean mOnCreateDefined
+    boolean mAttachBaseContextDefined
+    boolean mOnConfigChangedDefined
+    boolean mOnLowMemoryDefined
+    boolean mOnTerminateDefined
+    boolean mOnTrimMemoryDefined
+
     MainAppVisitor() {
         super(Opcodes.ASM5)
     }
@@ -30,19 +41,64 @@ class MainAppVisitor extends ClassVisitor {
         String nameDesc = name + descriptor
         switch (nameDesc) {
             case "onCreate()V":
+                mOnCreateDefined = true
                 return new InsertMethodVisitor(methodVisitor, name, descriptor, false, false)
             case "attachBaseContext(Landroid/content/Context;)V":
+                mAttachBaseContextDefined = true
                 return new InsertMethodVisitor(methodVisitor, name, descriptor, true, false)
             case "onConfigurationChanged(Landroid/content/res/Configuration;)V":
+                mOnConfigChangedDefined = true
                 return new InsertMethodVisitor(methodVisitor, name, descriptor, true, false)
             case "onLowMemory()V":
+                mOnLowMemoryDefined = true
                 return new InsertMethodVisitor(methodVisitor, name, descriptor, false, false)
             case "onTerminate()V":
+                mOnTerminateDefined = true
                 return new InsertMethodVisitor(methodVisitor, name, descriptor, false, false)
             case "onTrimMemory(I)V":
+                mOnTrimMemoryDefined = true
                 return new InsertMethodVisitor(methodVisitor, name, descriptor, false, true)
         }
         return methodVisitor;
+    }
+
+    @Override
+    void visitEnd() {               // 如果代码中找不到下面方法，则向其中添加对应的方法
+        println("MainAppVisitor visitEnd")
+        if (!mAttachBaseContextDefined) {
+            defineMethod(Opcodes.ACC_PROTECTED, "attachBaseContext", "(Landroid/content/Context;)V", true, false)
+        }
+        if (!mOnCreateDefined) {
+            defineMethod(Opcodes.ACC_PUBLIC, "onCreate", "()V", false, false)
+        }
+        if (!mOnConfigChangedDefined) {
+            defineMethod(Opcodes.ACC_PUBLIC, "onConfigurationChanged", "(Landroid/content/res/Configuration;)V", true, false)
+        }
+        if (!mOnLowMemoryDefined) {
+            defineMethod(Opcodes.ACC_PUBLIC, "onLowMemory", "()V", false, false)
+        }
+        if (!mOnTerminateDefined) {
+            defineMethod(Opcodes.ACC_PUBLIC, "onTerminate", "()V", false, false)
+        }
+        if (!mOnTrimMemoryDefined) {
+            defineMethod(Opcodes.ACC_PUBLIC, "onTrimMemory", "(I)V", false, true)
+        }
+        super.visitEnd()
+    }
+
+    void defineMethod(int access, String name, String descriptor, boolean loadParaRef, boolean loadParaInt) {
+        println("MainAppVisitor defineMethod method: $access, $name, $descriptor")
+        MethodVisitor methodVisitor = this.visitMethod(access, name, descriptor, null, null)
+        methodVisitor.visitVarInsn(Opcodes.ALOAD, 0)
+        if (loadParaRef) {
+            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1)
+        }
+        if (loadParaInt) {
+            methodVisitor.visitVarInsn(Opcodes.ILOAD, 1)
+        }
+        methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, "android/app/Application", name, descriptor, false)
+        methodVisitor.visitInsn(Opcodes.RETURN)
+        methodVisitor.visitEnd()
     }
 
     /**
