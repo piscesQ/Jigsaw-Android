@@ -1,10 +1,12 @@
 package com.kore.sample.me
 
 import android.os.Bundle
+import com.kore.jigsaw.anno.router.Route
 import com.kore.sample.commons.CusToast
 import com.kore.sample.commons.base.BaseActivity
 import kotlinx.android.synthetic.main.me_activity_me.*
 
+@Route(path = "/me_home")
 class MeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

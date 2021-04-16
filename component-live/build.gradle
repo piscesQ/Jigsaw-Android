@@ -5,6 +5,12 @@ plugins {
     id 'kotlin-android-extensions'
 }
 
+kapt {
+    arguments {
+        arg("module", "live")
+    }
+}
+
 android {
     compileSdkVersion buildVersion.compileSdkVersion
     buildToolsVersion buildVersion.buildToolsVersion
@@ -45,4 +51,5 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
+    kapt project(':jiasaw-apt')
 }

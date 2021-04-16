@@ -1,10 +1,12 @@
 package com.kore.sample.live
 
 import android.os.Bundle
+import com.kore.jigsaw.anno.router.Route
 import com.kore.sample.commons.CusToast
 import com.kore.sample.commons.base.BaseActivity
 import kotlinx.android.synthetic.main.live_frg_live.*
 
+@Route(path = "/live_home")
 class LiveActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

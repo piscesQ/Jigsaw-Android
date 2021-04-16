@@ -6,6 +6,12 @@ plugins {
     id 'jigsaw-plugin'
 }
 
+kapt {
+    arguments {
+        arg("module", "app")
+    }
+}
+
 android {
     compileSdkVersion buildVersion.compileSdkVersion
     buildToolsVersion buildVersion.buildToolsVersion
@@ -45,4 +51,6 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
+
+    kapt project(':jiasaw-apt')
 }
