@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'kotlin'
 }
 
 java {
@@ -9,6 +8,10 @@ java {
 }
 
 dependencies {
-    implementation deps.kotlinStdlib
+    implementation deps.autoService
+    implementation deps.javapoet
     implementation project(':jigsaw-anno')
+
+    implementation deps.commonsLang3
+    implementation deps.commonsCollections4
 }
