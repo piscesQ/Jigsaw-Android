@@ -6,7 +6,7 @@ package com.kore.jigsaw.plugin.bean
  */
 class PriorityModuleApp {
     int priority = 0            // @ModuleApp 对应类的优先级，用于排序
-    String className            // class 文件对应的名字
+    String className            // class 文件对应的名字，example: com/kore/sample/news/NewsApp
 
     PriorityModuleApp(String className) {
         this.className = className

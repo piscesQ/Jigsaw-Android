@@ -42,5 +42,7 @@ dependencies {
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
 
+    api deps.gson
+
     api project(':jigsaw-anno')
 }

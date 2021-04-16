@@ -7,9 +7,10 @@ import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.kore.jigsaw.plugin.asm.TraverseClassVisitor
+import com.kore.jigsaw.plugin.asm.JRouterVisitor
 import com.kore.jigsaw.plugin.asm.JigsawVisitor
 import com.kore.jigsaw.plugin.asm.MainAppVisitor
+import com.kore.jigsaw.plugin.asm.TraverseClassVisitor
 import com.kore.jigsaw.plugin.asm.VisitorCallback
 import com.kore.jigsaw.plugin.bean.PriorityModuleApp
 import com.kore.jigsaw.plugin.util.Compressor
@@ -26,10 +27,15 @@ import org.objectweb.asm.ClassWriter
  * 并在 @MainApp 类中调用各个模块的 Application 的对应方法
  */
 class JigsawTransform extends Transform {
-    def project
+    def mProject
+    def mMainAppMap = [:]               // 存放 @MainApp 的注解类 Map<InputFile : OutputFile>
+    def mModuleAppList = []             // 存放 @ModuleApp 的注解类 List<PriorityModuleApp> 用于排序
+    def mJRouterTableList = []          // 存放 @RouteTable 的注解类
+    def mJigsawMap = [:]                // 存放 jigsaw 类的位置 Map<InputFile : OutputFile>
+    def mJRouterMap = [:]               // 存放 jRouter 类的位置 Map<InputFile : OutputFile>
 
     JigsawTransform(Project project) {
-        this.project = project
+        this.mProject = project
     }
 
     /**
@@ -40,7 +46,7 @@ class JigsawTransform extends Transform {
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 
-        println("===Kore lifecycle JigsawTransform transform start..... project = ${project}")
+        println("===Kore lifecycle JigsawTransform transform start..... project = ${mProject}")
 
         /*
         1、遍历所有的 class 文件，收集被 @ModuleApp @MainApp 注解的类
@@ -51,10 +57,7 @@ class JigsawTransform extends Transform {
 
         def moduleJarList = []          // 存放 module 对应的 jar
         def jigsawCore = []             // 存放 jigsaw 核心库对应的 jar
-        def mainAppMap = [:]            // 存放 @MainApp 的注解类 Map<InputFile : OutputFile>
-        def moduleAppList = []          // 存放 @ModuleApp 的注解类 List<PriorityModuleApp> 用于排序
         def compressTaskMap = [:]       // 存放最后需要压缩的任务 Map<JarInput, OutputFile>
-        def jigsawMap = [:]             // 存放 jigsaw 类的位置 Map<InputFile : OutputFile>
         transformInvocation.inputs.each { input ->
             input.jarInputs.each { jarInput ->      // 包含外部依赖的 jar ，也包括依赖 library 的 class.jar
                 def name = jarInput.name
@@ -91,9 +94,7 @@ class JigsawTransform extends Transform {
                             new File(outDir, path).mkdirs()
                         } else {
                             def output = new File(outDir, path)
-                            // 在当前 app 中寻找注解
-                            findMainAppClass(it, output, mainAppMap)
-                            findModuleAppClass(it, moduleAppList)
+                            findAppClass(it, output)     // 在当前 app 中寻找注解
                             if (!output.parentFile.exists()) output.parentFile.mkdirs()
                             output.bytes = it.bytes                 // 直接复制一份到 output
                         }
@@ -111,23 +112,28 @@ class JigsawTransform extends Transform {
 
         // 遍历 moduleJarList
         moduleJarList.each { jarInput ->
-            def unzipFile = traversalJar(jarInput, { File it -> return findModuleAppClass(it, moduleAppList) })
+            def unzipFile = traversalJar(jarInput, { File it -> return findAppClass(it, it) })
             compressorDir(transformInvocation, jarInput, unzipFile)
         }
 
         // 找到 Jigsaw 所在的位置
         jigsawCore.each { jarInput ->
-            def unzipFile = traversalJar(jarInput, { File it -> return findJigsaw(it, it, jigsawMap) })
+            def unzipFile = traversalJar(jarInput, { File it -> return findJigsaw(it, it) })
             compressTaskMap[jarInput] = unzipFile
         }
 
         // 将 moduleApp 的实例添加到 Jigsaw 的 mModuleAppList 中
-        jigsawMap.each { inputFile, outputFile ->
-            insertCodeToJigsaw(inputFile, outputFile, moduleAppList)
+        mJigsawMap.each { inputFile, outputFile ->
+            insertCodeToJigsaw(inputFile, outputFile)
+        }
+
+        // 将 @RouteTable 的实例添加到 JRouter 的 mList 中
+        mJRouterMap.each { inputFile, outputFile ->
+            insertCodeToJRouter(inputFile, outputFile)
         }
 
         // 在 mainApp 中插入调用 Jigsaw 对应的代码，并将其输出到对应为目录
-        mainAppMap.each { inputFile, outputFile ->
+        mMainAppMap.each { inputFile, outputFile ->
             insertCodeToMainApp(inputFile, outputFile)
         }
 
@@ -136,41 +142,16 @@ class JigsawTransform extends Transform {
             compressorDir(transformInvocation, jarInput, unzipDir)
         }
 
-        println("===Kore lifecycle JigsawTransform transform end..... project = ${project}")
+        println("===Kore lifecycle JigsawTransform transform end..... project = ${mProject}")
     }
 
     /**
-     * 遍历目录下的所有文件，找到 @MainApp 的注解类，并将其加入的对应的 list 中
-     *
-     * @param inputFile 输入的文件
-     * @param outputFile 输出的文件
-     * @param mainAppMap MainApp 对应的 list
-     */
-    void findMainAppClass(File inputFile, File outputFile, Map<File, File> mainAppMap) {
-        if (!inputFile.exists() || !inputFile.name.endsWith(".class")) {
-            return
-        }
-        def inputStream = new FileInputStream(inputFile)
-        ClassReader cr = new ClassReader(inputStream)       // 使用 classReader 遍历字节码，找到对应注解
-        def visitor = new TraverseClassVisitor("findMainAppClass")
-        visitor.callback = new VisitorCallback() {
-            @Override
-            void visitMainApp(String name) {
-                println("===Kore find findMainAppClass name = ${name}")
-                mainAppMap[inputFile] = outputFile
-            }
-        }
-        cr.accept(visitor, 0)
-        inputStream.close()
-    }
-
-    /**
-     * 遍历目录下的所有文件，找到  @ModuleApp 的注解类，并将其加入的对应的 list 中
+     * 遍历目录下的所有文件，找到 @MainApp, @ModuleApp 的注解类，并保存到对应变量
      *
      * @param inputFile 需要搜索的文件
-     * @param moduleAppList Module 对应的 list
+     * @param outputFile 输出的文件
      */
-    void findModuleAppClass(File inputFile, List moduleAppList) {
+    void findAppClass(File inputFile, File outputFile) {
         if (!inputFile.exists() || !inputFile.name.endsWith(".class")) {
             return
         }
@@ -178,18 +159,29 @@ class JigsawTransform extends Transform {
         ClassReader cr = new ClassReader(inputStream)       // 使用 classReader 遍历字节码，找到对应注解
         def visitor = new TraverseClassVisitor("findModuleAppClass")
         visitor.callback = new VisitorCallback() {
+            void visitMainApp(String name) {
+                println("===Kore find findMainAppClass name = ${name}")
+                mMainAppMap[inputFile] = outputFile
+            }
+
             @Override
             void visitModuleApp(String name) {
                 println("===Kore find findModuleAppClass name = ${name}")
-                addToModuleAppList(moduleAppList, name)
+                addToModuleAppList(mModuleAppList, name)
             }
 
             @Override
             void visitAnnoAttrs(String className, String attrName, Object attrValue) {
-                PriorityModuleApp curClass = moduleAppList.find { it ->
+                PriorityModuleApp curClass = mModuleAppList.find { it ->
                     it.className == className
                 }
                 curClass.priority = attrValue
+            }
+
+            @Override
+            void visitRouteTable(String name) {     // 将找到的 XxxJRouterMap.java 加入到 list 中
+                println("===Kore find findRouteTable name = ${name}")
+                mJRouterTableList.add(name)
             }
         }
         cr.accept(visitor, 0)
@@ -204,13 +196,12 @@ class JigsawTransform extends Transform {
     }
 
     /**
-     * 找到 Jigsaw 核心类
+     * 找到核心类 - Jigsaw, JRouter
      *
      * @param inputFile
      * @param outputFile
-     * @param jigsawMap
      */
-    void findJigsaw(File inputFile, File outputFile, Map<File, File> jigsawMap) {
+    void findJigsaw(File inputFile, File outputFile) {
         if (!inputFile.exists() || !inputFile.name.endsWith(".class")) {
             return
         }
@@ -221,8 +212,14 @@ class JigsawTransform extends Transform {
         visitor.callback = new VisitorCallback() {
             @Override
             void visitJigsaw(String name) {
-                jigsawMap[inputFile] = outputFile
-                println("===Kore find findJigsaw +++++")
+                mJigsawMap[inputFile] = outputFile
+                println("===Kore find findJigsaw!")
+            }
+
+            @Override
+            void visitJRouter(String name) {
+                mJRouterMap[inputFile] = outputFile
+                println("===Kore find findJRouter!")
             }
         }
         cr.accept(visitor, 0)
@@ -231,13 +228,28 @@ class JigsawTransform extends Transform {
 
     /**
      * 向 Jigsaw 类中插入代码
-     * @param jigsawFile
+     * @param inputFile
+     * @param outputFile
      */
-    void insertCodeToJigsaw(File inputFile, File outputFile, List<String> moduleAppList) {
+    void insertCodeToJigsaw(File inputFile, File outputFile) {
         def fileInputStream = new FileInputStream(inputFile)
         def reader = new ClassReader(fileInputStream)
         def writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-        def visitor = new JigsawVisitor(writer, moduleAppList)
+        def visitor = new JigsawVisitor(writer, mModuleAppList)
+        reader.accept(visitor, 0)
+        outputFile.bytes = writer.toByteArray()
+        fileInputStream.close()
+    }
+
+    /**
+     * 向 JRouter 类中插入代码
+     * @param jigsawFile
+     */
+    void insertCodeToJRouter(File inputFile, File outputFile) {
+        def fileInputStream = new FileInputStream(inputFile)
+        def reader = new ClassReader(fileInputStream)
+        def writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
+        def visitor = new JRouterVisitor(writer, mJRouterTableList)
         reader.accept(visitor, 0)
         outputFile.bytes = writer.toByteArray()
         fileInputStream.close()

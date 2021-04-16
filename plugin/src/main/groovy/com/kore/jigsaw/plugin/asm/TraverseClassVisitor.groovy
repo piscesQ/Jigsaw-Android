@@ -11,8 +11,10 @@ import org.objectweb.asm.Opcodes
  */
 public class TraverseClassVisitor extends ClassVisitor {
     private static final String NAME_JIGSAW_CLASS = "com/kore/jigsaw/core/Jigsaw"
+    private static final String NAME_JROUTER_CLASS = "com/kore/jigsaw/core/router/JRouter"
     private static final String SIGN_MAIN_APP = "Lcom/kore/jigsaw/anno/MainApp;"
     private static final String SIGN_MODULE_APP = "Lcom/kore/jigsaw/anno/ModuleApp;"
+    private static final String SIGN_ROUTE_TABLE = "Lcom/kore/jigsaw/anno/router/RouteTable;"
 
     private String mSource = ""
     private String mCurVisitName = ""           // 当前访问的 class 的 name
@@ -36,6 +38,10 @@ public class TraverseClassVisitor extends ClassVisitor {
             if (mCallback != null) {
                 mCallback.visitJigsaw(name)
             }
+        } else if (name == NAME_JROUTER_CLASS) {
+            if (mCallback != null) {
+                mCallback.visitJRouter(name)
+            }
         }
     }
 
@@ -52,6 +58,11 @@ public class TraverseClassVisitor extends ClassVisitor {
             case SIGN_MAIN_APP:
                 if (mCallback != null) {
                     mCallback.visitMainApp(mCurVisitName)
+                }
+                break
+            case SIGN_ROUTE_TABLE:
+                if (mCallback != null) {
+                    mCallback.visitRouteTable(mCurVisitName)
                 }
                 break
         }
