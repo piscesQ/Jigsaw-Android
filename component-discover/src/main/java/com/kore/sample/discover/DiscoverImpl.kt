@@ -21,7 +21,7 @@ class DiscoverImpl : IDiscover {
     }
 
     override fun getDiscoverInfo(): String {
-        return "This String from News Module"
+        return "This String from Discover Module"
     }
 }
 

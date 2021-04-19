@@ -15,6 +15,7 @@ import com.kore.jigsaw.plugin.asm.VisitorCallback
 import com.kore.jigsaw.plugin.bean.PriorityModuleApp
 import com.kore.jigsaw.plugin.util.Compressor
 import com.kore.jigsaw.plugin.util.Decompression
+import com.kore.jigsaw.plugin.util.PluginUtils
 import groovy.io.FileType
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
@@ -58,14 +59,18 @@ class JigsawTransform extends Transform {
         def moduleJarList = []          // 存放 module 对应的 jar
         def jigsawCore = []             // 存放 jigsaw 核心库对应的 jar
         def compressTaskMap = [:]       // 存放最后需要压缩的任务 Map<JarInput, OutputFile>
+
+        // 当前依赖的所有组件
+        List<String> depLibrary = PluginUtils.getDepLibrary(mProject, PluginUtils.taskIsDebug(mProject))
+
         transformInvocation.inputs.each { input ->
             input.jarInputs.each { jarInput ->      // 包含外部依赖的 jar ，也包括依赖 library 的 class.jar
                 def name = jarInput.name
-                // TODO 如果之后 library 改成外部依赖的 aar ，则此处要修改，可以根据 aar 依赖的 group 来判断，需要有传入途径
                 if (name.startsWith(":jigsaw-core")) {  // 如果该 jar 是来自于依赖的 jigsaw-core 源码 library
                     jigsawCore.clear()  // 如果之前添加了外部的 jigsaw-core 依赖，则清空列表
                     jigsawCore.add(jarInput)
-                } else if (name.startsWith(":")) {              // 如果该 jar 来自于依赖的 library
+                } else if (name.startsWith(":") || depLibrary.contains(name)) {
+                    // 如果该 jar 来自于依赖的 library，支持工程依赖和 aar 依赖
                     moduleJarList.add(jarInput)
                 } else if (name.contains("jigsaw-core")) {      // 如果引用了 jigsaw-core 的外部依赖
                     if (jigsawCore.size() == 0) {

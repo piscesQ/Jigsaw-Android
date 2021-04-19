@@ -1,6 +1,7 @@
 package com.kore.jigsaw.plugin
 
 import com.android.build.gradle.internal.dependency.VariantDependencies
+import com.kore.jigsaw.plugin.util.PluginUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -25,61 +26,13 @@ class JigsawPlugin implements Plugin<Project> {
         def moduleName = project.path.replace(":", "")
         println("===Kore JigsawPlugin moduleName = ${moduleName}, nameList = ${nameList}")
 
-        def taskInfo = getTaskInfo(nameList)            // 获取当前执行的 task 的属性
+        def taskInfo = PluginUtils.getTaskInfo(nameList)            // 获取当前执行的 task 的属性
         if (taskInfo.isAssemble) {
-            def depLibrary = getDepLibrary(project, taskInfo.isDebug)
+            def depLibrary = PluginUtils.getDepLibrary(project, taskInfo.isDebug)
             addDependencies(project, depLibrary)
             project.android.registerTransform(new JigsawTransform(project))
         }
         println("===Kore lifecycle JigsawPlugin apply end.....")
-    }
-
-    /**
-     * 判断任务是否是 assemble 和 debug 类型
-     *
-     * @param taskNames
-     * @return 返回 TaskInfo 对象
-     */
-    private TaskInfo getTaskInfo(List<String> taskNames) {
-        TaskInfo taskInfo = new TaskInfo()
-        for (String task : taskNames) {
-            if (task.toUpperCase().contains("ASSEMBLE")
-                    || task.contains("aR")
-                    || task.contains("asR")
-                    || task.contains("asD")
-                    || task.toUpperCase().contains("TINKER")
-                    || task.toUpperCase().contains("INSTALL")
-                    || task.toUpperCase().contains("RESGUARD")) {
-                if (task.toUpperCase().contains("DEBUG")) {
-                    taskInfo.isDebug = true
-                }
-                taskInfo.isAssemble = true
-                break
-            }
-        }
-        return taskInfo
-    }
-
-    /**
-     * 获取 project 下的依赖列表
-     *
-     * @param project
-     * @param isDebug 当前 task 是否是 debug 任务
-     * @return 依赖列表
-     */
-    List<String> getDepLibrary(Project project, boolean isDebug) {
-        String strDep = ""
-        if (isDebug) {
-            strDep = project.properties.get("debugComponent")
-        } else {
-            strDep = project.properties.get("compileComponent")
-        }
-        def depArr = strDep.split(",")
-        def list = []
-        for (String item : depArr) {
-            list.add(item.trim())
-        }
-        return list
     }
 
     /**
@@ -115,10 +68,5 @@ class JigsawPlugin implements Plugin<Project> {
             return false;
         }
         return Pattern.matches("\\S+(\\.\\S+)+:\\S+(:\\S+)?(@\\S+)?", str);
-    }
-
-    private class TaskInfo {            // 当前 task 的属性
-        boolean isAssemble = false
-        boolean isDebug = false
     }
 }
