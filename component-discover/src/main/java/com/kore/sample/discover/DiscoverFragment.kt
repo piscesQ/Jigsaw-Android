@@ -5,7 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.kore.jigsaw.core.Jigsaw
+import com.kore.jigsaw.core.router.JRouter
 import com.kore.sample.commons.CusToast
+import com.kore.sample.interfaceshelf.me.IMe
 import kotlinx.android.synthetic.main.discover_frg_discover.*
 
 private const val ARG_SOURCE = "ARG_SOURCE"
@@ -32,6 +35,20 @@ class DiscoverFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         iv_fruit.setOnClickListener {
             CusToast.show("我是蓝莓！")
+        }
+
+        initView()
+    }
+
+    private fun initView() {
+        btn_go_next_home.setOnClickListener {
+            val openUri = JRouter.get().openUri(activity, "jigsaw://me/me_home")
+            CusToast.show("openUri = $openUri")
+        }
+
+        btn_get_str_from_next.setOnClickListener {
+            val service = Jigsaw.getService(IMe::class.java) as IMe
+            CusToast.show(service.getMeInfo())
         }
     }
 

@@ -5,7 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.kore.jigsaw.core.Jigsaw
+import com.kore.jigsaw.core.router.JRouter
 import com.kore.sample.commons.CusToast
+import com.kore.sample.interfaceshelf.live.ILive
 import kotlinx.android.synthetic.main.news_frg_news.*
 
 private const val ARG_SOURCE = "ARG_SOURCE"
@@ -32,6 +35,20 @@ class NewsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         iv_fruit.setOnClickListener {
             CusToast.show("我是榴莲！")
+        }
+
+        initView()
+    }
+
+    private fun initView() {
+        btn_go_next_home.setOnClickListener {
+            val openUri = JRouter.get().openUri(activity, "jigsaw://live/live_home")
+            CusToast.show("openUri = $openUri")
+        }
+
+        btn_get_str_from_next.setOnClickListener {
+            val service = Jigsaw.getService(ILive::class.java) as ILive
+            CusToast.show(service.getLiveInfo())
         }
     }
 
