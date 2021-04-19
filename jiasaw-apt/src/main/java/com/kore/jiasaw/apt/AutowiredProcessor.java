@@ -164,9 +164,7 @@ public class AutowiredProcessor extends BaseProcessor {
             statBuilder.append(genStatementByType(attrTypeNum, "act." + attrName));
 
             String keyName = StringUtils.isEmpty(fieldAnno.name()) ? attrName : fieldAnno.name();       // 传入的 key
-            if (attrTypeNum == TypeKind.SERIALIZABLE.ordinal()) {
-                builder.addStatement(statBuilder.toString(), attrName, attrTypeName, keyName);
-            } else if (attrTypeNum == TypeKind.OBJECT.ordinal()) {
+            if (attrTypeNum == TypeKind.OBJECT.ordinal()) {
                 builder.addStatement(statBuilder.toString(), attrName, keyName, attrTypeName);
             } else {
                 builder.addStatement(statBuilder.toString(), attrName, keyName);
@@ -204,9 +202,9 @@ public class AutowiredProcessor extends BaseProcessor {
         } else if (TypeKind.BOOLEAN.ordinal() == type) {
             builder.append(prefix).append("getBooleanExtra($S, ").append(defaultValue).append(")");
         } else if (TypeKind.PARCELABLE.ordinal() == type) {
-            builder.append(prefix).append("getParcelableExtra($S)");
+            builder.append("getParcelableObj(").append(strIntent).append(", $S, ").append(defaultValue).append(")");
         } else if (TypeKind.SERIALIZABLE.ordinal() == type) {       // serializable 类型 需要增加强转
-            builder.append("($T)").append(prefix).append("getSerializableExtra($S)");
+            builder.append("getSerializableObj(").append(strIntent).append(", $S, ").append(defaultValue).append(")");
         }
         return builder.toString();
     }

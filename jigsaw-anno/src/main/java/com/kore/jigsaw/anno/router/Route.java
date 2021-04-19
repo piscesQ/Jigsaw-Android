@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @description 路由相关注解，路由节点
  */
 @Target({ElementType.TYPE})
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Route {
     String path();                  // 路径
 

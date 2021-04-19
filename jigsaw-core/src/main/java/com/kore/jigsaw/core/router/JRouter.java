@@ -109,7 +109,10 @@ public class JRouter {
     private Bundle decodeParams(Map<String, Integer> paramsInfo, Uri uri, Bundle bundle) {
         Set<String> paramSet = uri.getQueryParameterNames();
         for (String key : paramSet) {
-            int type = paramsInfo.get(key);
+            Integer type = paramsInfo.get(key);
+            if (type == null) {       // 参数找不到时，直接跳过
+                continue;
+            }
             String value = uri.getQueryParameter(key);
             addToBundle(bundle, type, key, value);
         }

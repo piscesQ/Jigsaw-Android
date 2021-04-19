@@ -12,6 +12,7 @@ import com.squareup.javapoet.TypeSpec;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,7 +31,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import static com.kore.jigsaw.anno.utils.Constants.ACTIVITY;
-import static com.kore.jigsaw.anno.utils.Constants.ANNOTATION_TYPE_AUTOWIRED;
 import static com.kore.jigsaw.anno.utils.Constants.ANNOTATION_TYPE_ROUTE;
 import static com.kore.jigsaw.anno.utils.Constants.BASE_MODULE_ROUTER;
 import static com.kore.jigsaw.anno.utils.Constants.JIGSAW_CORE_PKG;
@@ -43,7 +43,7 @@ import static com.kore.jigsaw.anno.utils.Constants.SUFFIX_ROUTER_MAP;
  * @description 处理 @Route 注解
  */
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
+@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE})
 public class RouteProcessor extends BaseProcessor {
 
     @Override
@@ -148,18 +148,25 @@ public class RouteProcessor extends BaseProcessor {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC);
         for (Element classEle : routeMap.keySet()) {
-            StringBuilder strBuilder = new StringBuilder();
             Route annoRoute = classEle.getAnnotation(Route.class);
             String path = annoRoute.path();
             String desc = annoRoute.desc();
             TypeMirror tmClass = classEle.asType();
             TypeName tnClass = ClassName.get(tmClass);
+            builder.addComment("---------------------");
+            if (!StringUtils.isEmpty(desc)) {
+                builder.addComment("Route page $T's $L", tnClass, desc);
+            }
             builder.addStatement("addPathMap($S, $T.class)", path, tnClass);
-            for(Element filedEle : routeMap.get(classEle)){     // 向类中添加属性
+            for (Element filedEle : routeMap.get(classEle)) {     // 向类中添加属性
                 Autowired annoAutowired = filedEle.getAnnotation(Autowired.class);
-                String name = annoAutowired.name();
+                String eleName = filedEle.getSimpleName().toString();           // 元素的名称
+                String name = StringUtils.isEmpty(annoAutowired.name()) ? eleName : annoAutowired.name();   // 传递的属性名
                 String fieldDesc = annoAutowired.desc();
                 int attrTypeNum = typeUtils.typeExchange(filedEle);
+                if (!StringUtils.isEmpty(fieldDesc)) {
+                    builder.addComment("Intent attr $T's $L", tnClass, fieldDesc);
+                }
                 builder.addStatement("addParamMap($T.class, $S, $L)", tnClass, name, String.valueOf(attrTypeNum));
             }
         }

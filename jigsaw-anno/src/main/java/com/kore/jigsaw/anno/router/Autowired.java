@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @description 路由相关注解，自动注入属性
  */
 @Target({ElementType.FIELD})
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Autowired {
     String name() default "";               // 属性名
 

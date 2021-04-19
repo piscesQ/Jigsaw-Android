@@ -53,7 +53,39 @@ public abstract class BaseAutowired {
             return defaultValue;
         }
         return obj;
+    }
 
+    /**
+     * 根据 key 获取序列化之后的对象，如果是空，则返回默认值
+     *
+     * @param intent
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    protected <T> T getSerializableObj(Intent intent, String key, T defaultValue) {
+        T serialObj = (T) intent.getSerializableExtra(key);
+        if (serialObj == null) {
+            return defaultValue;
+        } else {
+            return serialObj;
+        }
+    }
 
+    /**
+     * 根据 key 获取序列化之后的对象，如果是空，则返回默认值
+     *
+     * @param intent
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    protected <T> T getParcelableObj(Intent intent, String key, T defaultValue) {
+        T parcelableObj = intent.getParcelableExtra(key);
+        if (parcelableObj == null) {
+            return defaultValue;
+        } else {
+            return parcelableObj;
+        }
     }
 }
