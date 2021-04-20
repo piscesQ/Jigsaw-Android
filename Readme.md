@@ -8,8 +8,8 @@
 ## module 说明和依赖图
 
 ```plain
-app: 主应用
-runalone: 独立运行的所有 application
+app: 主应用 Application
+runalone: 独立运行的所有 Application
 
 component-discover: 组件模块 - discover
 component-live: 组件模块 - live
@@ -64,6 +64,11 @@ repo: 本地的插件仓库，plugin 生成插件后传入该目录
                          |                       |
                          -------------------------
 
+                         -------------------------
+                         |                       |
+                         |         plugin        |（只在 Application 的 Module 中引用）
+                         |                       |
+                         -------------------------
 ```
 
 
@@ -89,7 +94,7 @@ repo: 本地的插件仓库，plugin 生成插件后传入该目录
     使用 gradle 插件，将其注入到 Jigsaw 中，并将该部分代码注入到 MainApp 中  
 2、JRouter  
 （1）包含 List<BaseModuleRouter> ，每个 module 与 BaseModuleRouter 的实现类一一对应  
-（2）包含构造方法，在 transform 中，将所有 module 对应的 BaseModuleRouter 的实现类，初始化，并插入到该方法中；TODO 按照优先级排序  
+（2）包含构造方法，在 transform 中，将所有 module 对应的 BaseModuleRouter 的实现类，初始化，并插入到该方法中  
 （3）包含 verifyUri ，用于验证传入的 path 和 对应参数列表是否合法  
 （4）包含 openUri，用于跳转到指定页面，需要支持 onActivityForResult  
 
@@ -115,7 +120,7 @@ repo: 本地的插件仓库，plugin 生成插件后传入该目录
 2、RouteProcessor 的 @SupportedAnnotationTypes 去掉 autowired 测试（测试正常，已修改）  
 
 ### TODO 
-1、aar支持  
-2、页面跳转是否需要登陆（暂不需要，业务层处理）  
-3、页面跳转是否需要安全模式，必传参数的校验  
+1、页面跳转是否需要登陆（暂不需要，业务层处理）  
+2、页面跳转是否需要安全模式，必传参数的校验  
+3、路由表按照优先级排序  
 

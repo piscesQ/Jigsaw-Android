@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'kotlin-android-extensions'
+    id 'maven'
 }
 
 kapt {
@@ -52,5 +53,20 @@ dependencies {
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
 
-    kapt project(':jiasaw-apt')
+//    kapt project(':jiasaw-apt')
+    kapt jigsaw.apt
+}
+
+apply from: '../upload_constant.gradle'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('../repo'))
+            pom.version = COMPONENT_VERSION
+            pom.groupId = COMPONENT_GROUP_ID
+            pom.artifactId = 'component-news'
+            pom.packaging = FORMAT_AAR
+        }
+    }
 }

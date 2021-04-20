@@ -52,5 +52,6 @@ dependencies {
     androidTestImplementation deps.extJunit
     androidTestImplementation deps.espressoCore
 
-    kapt project(':jiasaw-apt')
+//    kapt project(':jiasaw-apt')
+    kapt jigsaw.apt
 }

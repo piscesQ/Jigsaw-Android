@@ -23,6 +23,7 @@ ext {
             commonsLang3       : '3.4',
             commonsCollections4: '4.1',
             gson               : '2.8.2',
+            jigsaw             : '1.0.3',
     ]
 
     plu = [
@@ -46,5 +47,11 @@ ext {
             commonsLang3       : "org.apache.commons:commons-lang3:${versions.commonsLang3}",
             commonsCollections4: "org.apache.commons:commons-collections4:${versions.commonsCollections4}",
             gson               : "com.google.code.gson:gson:${versions.gson}"
+    ]
+
+    jigsaw = [
+            core      : "com.kore.jigsaw:jigsaw-core:${versions.jigsaw}",
+            apt       : "com.kore.jigsaw:jigsaw-apt:${versions.jigsaw}",
+            annotation: "com.kore.jigsaw:jigsaw-anno:${versions.jigsaw}"
     ]
 }

@@ -34,7 +34,9 @@ android {
 }
 
 dependencies {
-    api project(':jigsaw-core')
+//    api project(':jigsaw-core')
+    api jigsaw.core
+
     implementation deps.kotlinStdlib
     implementation deps.coreKtx
     implementation deps.appcompat

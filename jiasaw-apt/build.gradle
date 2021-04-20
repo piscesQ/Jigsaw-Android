@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'maven'
 }
 
 java {
@@ -10,8 +11,22 @@ java {
 dependencies {
     implementation deps.autoService
     implementation deps.javapoet
-    implementation project(':jigsaw-anno')
+//    implementation project(':jigsaw-anno')
+    compileOnly jigsaw.annotation
 
     implementation deps.commonsLang3
     implementation deps.commonsCollections4
+}
+
+apply from: '../upload_constant.gradle'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: MAVEN_LOCAL_PATH)
+            pom.version = JIGSAW_VERSION
+            pom.groupId = JIGSAW_GROUP_ID
+            pom.artifactId = 'jigsaw-apt'
+        }
+    }
 }
