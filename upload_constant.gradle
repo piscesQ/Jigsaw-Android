@@ -7,7 +7,7 @@ ext {
     FORMAT_JAR = 'jar'
 
     // jigsaw 相关库的信息
-    JIGSAW_VERSION = '1.0.3'
+    JIGSAW_VERSION = '1.0.4'
     JIGSAW_GROUP_ID = 'com.kore.jigsaw'
 
     // 组件相关的信息

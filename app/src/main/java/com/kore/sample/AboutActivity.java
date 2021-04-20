@@ -20,6 +20,8 @@ public class AboutActivity extends Activity {
 
     @Autowired
     String mSource = "default";
+    @Autowired(required = true)
+    String mName = "default_name";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,7 +30,9 @@ public class AboutActivity extends Activity {
 
         setContentView(R.layout.act_about);
         TextView tvInfo = (TextView) findViewById(R.id.tv_info);
-        String showText = "source: " + mSource;
+        String showText = "source: " + mSource + "\n"
+                + "mName = " + mName + "\n";
+
         tvInfo.setText(showText);
     }
 }

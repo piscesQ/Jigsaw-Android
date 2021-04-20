@@ -17,13 +17,13 @@ ext {
             extJunit           : '1.1.2',
             espressoCore       : '3.3.0',
             legacySupportV4    : '1.0.0',
-            jigsawPlugin       : '1.0.1',
             autoService        : '1.0',
             javapoet           : '1.12.1',
             commonsLang3       : '3.4',
             commonsCollections4: '4.1',
             gson               : '2.8.2',
-            jigsaw             : '1.0.3',
+            jigsawPlugin       : '1.0.4',
+            jigsaw             : '1.0.4',
     ]
 
     plu = [

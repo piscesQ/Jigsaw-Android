@@ -7,6 +7,7 @@ import com.kore.jigsaw.anno.router.Route
 import com.kore.jigsaw.core.router.JRouter
 import com.kore.sample.bean.Computer
 import com.kore.sample.bean.Person
+import com.kore.sample.commons.CusToast
 import kotlinx.android.synthetic.main.act_menu.*
 import java.io.File
 
@@ -30,7 +31,7 @@ class MenuActivity : AppCompatActivity() {
 
             var path = "jigsaw://news/news_home"
             var result = JRouter.get().openUri(this, path)
-            Log.d(TAG, "JRouter news result = $result")
+            CusToast.show("openUri = $result")
         }
 
         btn_goto_live.setOnClickListener {
@@ -42,6 +43,7 @@ class MenuActivity : AppCompatActivity() {
             var path = "jigsaw://live/live_home"
             var result = JRouter.get().openUri(this, path)
             Log.d(TAG, "JRouter live result = $result")
+            CusToast.show("openUri = $result")
         }
 
         btn_goto_discover.setOnClickListener {
@@ -53,6 +55,7 @@ class MenuActivity : AppCompatActivity() {
             var path = "jigsaw://discover/discover_home"
             var result = JRouter.get().openUri(this, path)
             Log.d(TAG, "JRouter discover result = $result")
+            CusToast.show("openUri = $result")
         }
 
         btn_goto_me.setOnClickListener {
@@ -64,12 +67,14 @@ class MenuActivity : AppCompatActivity() {
             var path = "jigsaw://me/me_home"
             var result = JRouter.get().openUri(this, path)
             Log.d(TAG, "JRouter me result = $result")
+            CusToast.show("openUri = $result")
         }
 
         btn_goto_detail_no_params.setOnClickListener {
             val path = "jigsaw://app/detail"
             var result = JRouter.get().openUri(this, path)
             Log.d(TAG, "JRouter detail result = $result")
+            CusToast.show("openUri = $result")
         }
 
         btn_goto_detail.setOnClickListener {
@@ -89,12 +94,14 @@ class MenuActivity : AppCompatActivity() {
                     "&user={\"name\":\"芦苇\",\"age\":99}"
             var result = JRouter.get().openUri(this, path, bundle)
             Log.d(TAG, "JRouter detail result = $result")
+            CusToast.show("openUri = $result")
         }
 
         btn_goto_about.setOnClickListener {
             var path = "jigsaw://app/about?mSource=菜单页"
             var result = JRouter.get().openUri(this, path)
             Log.d(TAG, "JRouter about result = $result")
+            CusToast.show("openUri = $result")
         }
     }
 }

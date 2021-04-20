@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.kore.jigsaw.core.Jigsaw
 import com.kore.jigsaw.core.router.JRouter
+import com.kore.sample.commons.CusToast
 import com.kore.sample.interfaceshelf.discover.IDiscover
 import com.kore.sample.interfaceshelf.live.ILive
 import com.kore.sample.interfaceshelf.me.IMe
@@ -50,7 +51,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         iv_menu.setOnClickListener {
-            JRouter.get().openUri(this, "jigsaw://app/menu")
+            val openUri = JRouter.get().openUri(this, "jigsaw://app/menu")
+            CusToast.show("openUri = $openUri")
         }
     }
 }
