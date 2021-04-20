@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.kore.jigsaw.core.Jigsaw
 import com.kore.jigsaw.core.router.JRouter
+import com.kore.sample.commons.CusToast
 import com.kore.sample.interfaceshelf.live.ILive
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -40,7 +41,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         tv_act.setOnClickListener {
-            JRouter.get().openUri(this, "jigsaw://live/live_home")
+            val openUri = JRouter.get().openUri(this, "jigsaw://live/live_home")
+            CusToast.show("openUri = $openUri")
         }
     }
 }
