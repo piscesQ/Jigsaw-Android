@@ -31,6 +31,7 @@ import javax.lang.model.type.TypeMirror;
 
 import static com.kore.jigsaw.anno.utils.Constants.ACTIVITY;
 import static com.kore.jigsaw.anno.utils.Constants.ANNOTATION_TYPE_AUTOWIRED;
+import static com.kore.jigsaw.anno.utils.Constants.BUNDLE;
 import static com.kore.jigsaw.anno.utils.Constants.INTERFACE_AUTOWIRED;
 import static com.kore.jigsaw.anno.utils.Constants.SUFFIX_AUTOWIRED;
 
@@ -120,7 +121,9 @@ public class AutowiredProcessor extends BaseProcessor {
             String packageName = fullName.substring(0, fullName.lastIndexOf("."));
 
             MethodSpec methodInject = genInjectMethod(classEle, classMap.get(classEle));
+            MethodSpec methodPreCheck = genPreCheckMethod(classEle, classMap.get(classEle));
             helperClass.addMethod(methodInject);
+            helperClass.addMethod(methodPreCheck);
             JavaFile javaFile = JavaFile.builder(packageName, helperClass.build()).build();
             try {
                 javaFile.writeTo(mFiler);
@@ -207,5 +210,50 @@ public class AutowiredProcessor extends BaseProcessor {
             builder.append("getSerializableObj(").append(strIntent).append(", $S, ").append(defaultValue).append(")");
         }
         return builder.toString();
+    }
+
+    /**
+     * 构造 preCheck 方法
+     *
+     * @param classEle class 对应的的 element
+     * @param attrSet  class 中所有被 @Autowired 注解的属性的 set
+     * @return MethodSpec
+     */
+    private MethodSpec genPreCheckMethod(TypeElement classEle, Set<Element> attrSet) {
+
+         /*
+        方法代码样例：
+         public boolean preCheck(Bundle bundle){
+            if(!bundle.containsKey("p1")){
+                return  false;
+            }
+            if(!bundle.containsKey("p2")){
+                return  false;
+            }
+            return true;
+        }
+         */
+
+        TypeMirror tmBundle = elements.getTypeElement(BUNDLE).asType();
+        ParameterSpec bundleParaSpec = AnnoUtils.generateMethodParameterSpec(tmBundle, "bundle");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("preCheck")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.BOOLEAN)
+                .addParameter(bundleParaSpec);
+
+        for (Element attrEle : attrSet) {
+            Autowired fieldAnno = attrEle.getAnnotation(Autowired.class);       // 获得元素的注解类
+            String attrName = attrEle.getSimpleName().toString();               // 元素名称
+            boolean isRequired = fieldAnno.required();
+
+            if (isRequired) {
+                builder.beginControlFlow("if (!bundle.containsKey($S))", attrName);
+                builder.addStatement("return false");
+                builder.endControlFlow();
+            }
+        }
+        builder.addStatement("return true");
+        return builder.build();
     }
 }

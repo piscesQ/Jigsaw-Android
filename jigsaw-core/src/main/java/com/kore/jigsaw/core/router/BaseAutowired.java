@@ -2,6 +2,7 @@ package com.kore.jigsaw.core.router;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.kore.jigsaw.core.manager.GsonManager;
@@ -18,6 +19,24 @@ public abstract class BaseAutowired {
      * @param activity
      */
     public abstract void inject(Activity activity);
+
+    /**
+     * 传入 Bundle 对象，校验 bundle 中是否包含完整的必传参数
+     *
+     * @param bundle
+     * @return
+     */
+    public abstract boolean preCheck(Bundle bundle);
+
+    public boolean preDemo(Bundle bundle) {
+        if (!bundle.containsKey("p1")) {
+            return false;
+        }
+        if (!bundle.containsKey("p2")) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 获取字符串，如果字段为空，则返回默认值

@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.kore.jigsaw.anno.utils.Constants;
 import com.kore.jigsaw.anno.utils.TypeKind;
+import com.kore.jigsaw.core.bean.RouterResult;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -37,6 +38,11 @@ public class JRouter {
         static final JRouter INSTANCE = new JRouter();
     }
 
+    /**
+     * 在 Activity 的 onCreate 中调用，用于自动给 @Autowired 字段进行赋值
+     *
+     * @param activity
+     */
     public void inject(Activity activity) {
         // 找到该类的辅助类 $$JRouter$$Autowired ，使用反射进行然后初始化，并调用其中的 inject 方法
         Class<? extends Activity> clazz = activity.getClass();
@@ -45,17 +51,54 @@ public class JRouter {
             Class<?> helperClass = Class.forName(fullName + Constants.SUFFIX_AUTOWIRED);
             Method inject = helperClass.getMethod("inject", Activity.class);
             inject.setAccessible(true);
-            Object obj = helperClass.getConstructor().newInstance();
-            inject.invoke(obj, activity);
+            Object instance = helperClass.getConstructor().newInstance();
+            inject.invoke(instance, activity);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public boolean openUri(Context context, String path, Bundle bundle, int requestCode) {
+    /**
+     * 检查必要参数
+     *
+     * @param target
+     * @param paramsInfo
+     * @param bundle
+     * @return
+     */
+    public boolean preCheck(Class<?> target, Map<String, Integer> paramsInfo, Bundle bundle) {
+        // 找到该类的辅助类 $$JRouter$$Autowired ，使用反射进行然后初始化，并调用其中的 preCheck 方法
+        if (paramsInfo == null || paramsInfo.size() == 0)
+            return true;        // 如果跳转参数列表为 null 则返回 true
+        String fullName = target.getName();
+        try {
+            Class<?> helperClass = Class.forName(fullName + Constants.SUFFIX_AUTOWIRED);
+            Method preCheck = helperClass.getMethod("preCheck", Bundle.class);
+            preCheck.setAccessible(true);
+            Object instance = helperClass.getConstructor().newInstance();
+            Object result = preCheck.invoke(instance, bundle);
+            if (result instanceof Boolean) {
+                return (boolean) result;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public RouterResult openUri(Context context, String path, Bundle bundle) {
+        return openUri(context, path, bundle, 0);
+    }
+
+    public RouterResult openUri(Context context, String path) {
+        return openUri(context, path, new Bundle(), 0);
+    }
+
+    public RouterResult openUri(Context context, String path, Bundle bundle, int requestCode) {
         if (TextUtils.isEmpty(path) || !path.startsWith("jigsaw://")) {
-            Log.e(TAG, "path is invalid!");
-            return false;
+            String msg = "path is invalid!";
+            Log.e(TAG, msg);
+            return new RouterResult(false, msg);
         }
         Uri pathUri = Uri.parse(path);
         String uriHost = pathUri.getHost();
@@ -64,11 +107,18 @@ public class JRouter {
             if (uriHost.equals(moduleRouter.getModuleName())) {
                 Class<?> target = moduleRouter.findTargetClass(uriPath);
                 if (target == null) {
-                    Log.e(TAG, "can't find target class!");
-                    return false;
+                    String msg = "can't find target class!";
+                    Log.e(TAG, msg);
+                    return new RouterResult(false, msg);
                 }
                 Map<String, Integer> paramsInfo = moduleRouter.findParamsInfo(target);
                 bundle = decodeParams(paramsInfo, pathUri, bundle);
+                boolean isParamsValid = preCheck(target, paramsInfo, bundle);
+                if (!isParamsValid) {
+                    String msg = "can't find required param!";
+                    Log.e(TAG, msg);
+                    return new RouterResult(false, msg);
+                }
 
                 Intent intent = new Intent(context, target);
                 intent.putExtras(bundle);
@@ -77,27 +127,12 @@ public class JRouter {
                 } else {
                     context.startActivity(intent);
                 }
-                return true;
+                return new RouterResult(true);
             }
         }
-        Log.e(TAG, "can't find target module!");
-        return false;
-    }
-
-    private Class<?> findTarget(Uri pathUri) {
-        String path = pathUri.getPath();
-        String scheme = pathUri.getScheme();
-        String host = pathUri.getHost();
-        Set<String> queryParameterNames = pathUri.getQueryParameterNames();
-        for (String key : queryParameterNames) {
-            pathUri.getQueryParameter(key);
-        }
-
-        return null;
-    }
-
-    private boolean verifyParams(Bundle bundle) {
-        return false;
+        String msg = "can't find target host module!";
+        Log.e(TAG, msg);
+        return new RouterResult(false, msg);
     }
 
     /**
@@ -108,6 +143,7 @@ public class JRouter {
      */
     private Bundle decodeParams(Map<String, Integer> paramsInfo, Uri uri, Bundle bundle) {
         Set<String> paramSet = uri.getQueryParameterNames();
+        if (paramsInfo == null || paramsInfo.size() == 0) return bundle;
         for (String key : paramSet) {
             Integer type = paramsInfo.get(key);
             if (type == null) {       // 参数找不到时，直接跳过
@@ -117,14 +153,6 @@ public class JRouter {
             addToBundle(bundle, type, key, value);
         }
         return bundle;
-    }
-
-    public boolean openUri(Context context, String path, Bundle bundle) {
-        return openUri(context, path, bundle, 0);
-    }
-
-    public boolean openUri(Context context, String path) {
-        return openUri(context, path, new Bundle(), 0);
     }
 
     /**
