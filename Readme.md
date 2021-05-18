@@ -1,5 +1,9 @@
 # Android 组件化框架 - jigsaw
 
+## 功能展示
+工程中的演示视频路径：jigsaw/doc/demo_video.mp4
+演示视频和测试apk链接: https://pan.baidu.com/s/1asA-OcrIrEC1fMnefNBusA 提取码: qysi   
+ 
 ## 功能说明
 1、业务模块完全解耦  
 2、每个模块能够提供对外接口  
